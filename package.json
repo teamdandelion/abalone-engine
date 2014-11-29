@@ -1,0 +1,22 @@
+{
+  "name": "abalone-game",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/danmane/abalone-engine.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/danmane/abalone-engine/issues"
+  },
+  "homepage": "https://github.com/danmane/abalone-engine",
+  "devDependencies": {
+    "typescript": "~1.3.0"
+  }
+}

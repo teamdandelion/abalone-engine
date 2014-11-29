@@ -2,29 +2,24 @@
 module AbaloneEngine {
 
     export interface GameRules {
-        sideLength            : number;
+        boardRadius           : number;
         maxPiecesPerMove      : number;
         startingNumberPieces  : number;
         marblesLosingThreshold: number; // when you have fewer than this many marbles, you lose
         movesUntilTie         : number;
     }
 
-    export interface Coordinate {
-        x: number;
-        y: number;
-    }
-
     export interface GameState {
         rules      : GameRules;
-        blackPieces: Coordinate[];
-        whitePieces: Coordinate[];
+        blackPieces: Hex.AxialCoordinate[];
+        whitePieces: Hex.AxialCoordinate[];
         nextPlayer : Player
         turnCounter: number;
     }
 
     export interface Move {
         direction: Direction;
-        pieces   : Coordinate[];
+        pieces   : Hex.AxialCoordinate[];
     }
 
     export enum Direction {
@@ -48,13 +43,13 @@ module AbaloneEngine {
         TIE    ,
     }
 
-    interface PieceMap {[stringifiedCoordinate: string]: Player;} // useful representation: map from coordinate to which player controls that space
+    interface PieceMap {[stringifiedAxialCoordinate: string]: Player;} // useful representation: map from coordinate to which player controls that space
 
 
     function getPieceMap(gs: GameState): PieceMap {
         var pm: PieceMap = {};
-        gs.blackPieces.forEach((c: Coordinate) => pm[c.toString()] = Player.BLACK);
-        gs.whitePieces.forEach((c: Coordinate) => pm[c.toString()] = Player.WHITE);
+        gs.blackPieces.forEach((c: AxialCoordinate) => pm[c.toString()] = Player.BLACK);
+        gs.whitePieces.forEach((c: AxialCoordinate) => pm[c.toString()] = Player.WHITE);
         return pm;
     }
 
@@ -65,45 +60,12 @@ module AbaloneEngine {
         return Outcome.ONGOING;
     }
 
-    function getAdjacentCoord(c: Coordinate, d: Direction): Coordinate {
+    function getAdjacentCoord(c: AxialCoordinate, d: Direction): AxialCoordinate {
 
     }
 
-    function isWithinBoardBoundaries(c: Coordinate, r: GameRules) {
-
-    }
-
-    enum Alignment {
-        STRAIGHT;
-        LEFT;
-        RIGHT;
-        INVALID;
-    }
-
-    interface DecomposedDirection {
-        alignment: Alignment;
-        isPositive: boolean;
-    }
-
-    function getAlignment(c1: Coordinate, c2: Coordinate): Alignment {
-
-    }
-
-    function piecesAreInALine(pieces: Coordinate[]) {
-        if (pieces.length < 2) return true;
-        var origin = pieces[0];
-        var alignments = pieces.slice(1).map((c: Coordinate) => getAlignment(c, origin));
-        var uniqAlignments = _.uniq(alignments);
-        if (uniqAlignments.length !== 1) return false;
-        var alignment = uniqAlignments[0];
-        if (alignment === Alignment.INVALID) return false;
-        var distances = pieces.map((c: Coordinate) => getDistance(c, origin));
-        var greatestDistance = _.max(distances) - _.min(distances);
-        // at this point we have verified that they are all on the same alignment, so the pieces are a continuous line iff
-        // the dstances from any arbitrary point are a continuous subsequence of the integers (necessarily including 0)
-        // we can verify this efficiently by just checking the distance from the lowest to the highest distance
-        if (greatestDistance + 1 !== pieces.length) return false;
-        return true;
+    function isWithinBoardBoundaries(c: AxialCoordinate, r: GameRules) {
+        return Hex.distanceToOrigin(c) <= r.boardRadius;
     }
 
     export function isValid(move: Move, gs: GameState): boolean {
@@ -111,10 +73,10 @@ module AbaloneEngine {
         if (move.pieces.length > gs.rules.maxPiecesPerMove) return false;
         var pieceMap = getPieceMap(gs);
         // verify each piece exists and is owned by the right player
-        if (move.pieces.some((c: Coordinate) => pieceMap[c.toString()] !== gs.nextPlayer)) return false; 
+        if (move.pieces.some((c: AxialCoordinate) => pieceMap[c.toString()] !== gs.nextPlayer)) return false; 
         
 
-        function adjacentSpaceIsAvailable(c: Coordinate): boolean {
+        function adjacentSpaceIsAvailable(c: AxialCoordinate): boolean {
             var nextSpace = getAdjacentCoord(c, move.direction);
             return isWithinBoardBoundaries(nextSpace, gs.rules) && pieceMap[nextSpace] === undefined;
         }

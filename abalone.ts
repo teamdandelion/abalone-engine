@@ -77,6 +77,7 @@ module AbaloneEngine {
         STRAIGHT;
         LEFT;
         RIGHT;
+        INVALID;
     }
 
     interface DecomposedDirection {
@@ -84,6 +85,26 @@ module AbaloneEngine {
         isPositive: boolean;
     }
 
+    function getAlignment(c1: Coordinate, c2: Coordinate): Alignment {
+
+    }
+
+    function piecesAreInALine(pieces: Coordinate[]) {
+        if (pieces.length < 2) return true;
+        var origin = pieces[0];
+        var alignments = pieces.slice(1).map((c: Coordinate) => getAlignment(c, origin));
+        var uniqAlignments = _.uniq(alignments);
+        if (uniqAlignments.length !== 1) return false;
+        var alignment = uniqAlignments[0];
+        if (alignment === Alignment.INVALID) return false;
+        var distances = pieces.map((c: Coordinate) => getDistance(c, origin));
+        var greatestDistance = _.max(distances) - _.min(distances);
+        // at this point we have verified that they are all on the same alignment, so the pieces are a continuous line iff
+        // the dstances from any arbitrary point are a continuous subsequence of the integers (necessarily including 0)
+        // we can verify this efficiently by just checking the distance from the lowest to the highest distance
+        if (greatestDistance + 1 !== pieces.length) return false;
+        return true;
+    }
 
     export function isValid(move: Move, gs: GameState): boolean {
         if (move.pieces.length === 0) return true; // can always pass
@@ -91,18 +112,22 @@ module AbaloneEngine {
         var pieceMap = getPieceMap(gs);
         // verify each piece exists and is owned by the right player
         if (move.pieces.some((c: Coordinate) => pieceMap[c.toString()] !== gs.nextPlayer)) return false; 
-        // handle the singleton case on its own: just verify we are moving into a valid unoccupied space on the board
-        if (move.pieces.length === 1) {
-            var nextSpace = getAdjacentCoord(move.pieces[0], move.direction);
+        
+
+        function adjacentSpaceIsAvailable(c: Coordinate): boolean {
+            var nextSpace = getAdjacentCoord(c, move.direction);
             return isWithinBoardBoundaries(nextSpace, gs.rules) && pieceMap[nextSpace] === undefined;
         }
+
+        if (!piecesAreInALine(move.pieces)) return false; 
+
         var piecesAlignment = getAlignment(move.pieces);
         if (piecesAlignment == null) return false; // pieces were not in a line :(
         var isAStraightMove = piecesAlignment === decomposeDirection(move.direction).alignment;
         if (isAStraightMove) {
             // do the stragith move stuff
         } else {
-            
+            return move.pieces.every(adjacentSpaceIsAvailable);
         }
 
     }

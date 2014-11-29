@@ -4,8 +4,6 @@ module AbaloneEngine {
     export interface GameRules {
         boardRadius           : number;
         maxPiecesPerMove      : number;
-        startingNumberPieces  : number;
-        marblesLosingThreshold: number; // when you have fewer than this many marbles, you lose
         movesUntilTie         : number;
     }
 
@@ -54,9 +52,9 @@ module AbaloneEngine {
     }
 
     export function outcome(gs: GameState): Outcome {
-        if (gs.turnCounter > gs.rules.movesUntilTie)                 return Outcome.TIE;
-        if (gs.blackPieces.length < gs.rules.marblesLosingThreshold) return Outcome.WHITE;
-        if (gs.whitePieces.length < gs.rules.marblesLosingThreshold) return Outcome.BLACK;
+        if (gs.turnCounter > gs.rules.movesUntilTie) return Outcome.TIE;
+        if (gs.blackPieces.length === 0)             return Outcome.WHITE;
+        if (gs.whitePieces.length === 0)             return Outcome.BLACK;
         return Outcome.ONGOING;
     }
 

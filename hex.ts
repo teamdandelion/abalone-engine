@@ -1,3 +1,4 @@
+///<reference path="typings/lodash/lodash.d.ts" />
 ///<reference path="pairs.ts" />
 module Abalone {
 export module Hex {

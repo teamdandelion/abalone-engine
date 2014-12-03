@@ -1,5 +1,7 @@
-
-module AbaloneEngine {
+///<reference path="../typings/lodash/lodash.d.ts" />
+///<reference path="hex.ts" />
+module Abalone {
+export module Engine {
 
     export interface GameRules {
         boardRadius           : number;
@@ -21,11 +23,11 @@ module AbaloneEngine {
     }
 
     export enum Direction {
-        NORTH    ,
         NORTHEAST,
+        EAST,
         SOUTHEAST,
-        SOUTH    ,
         SOUTHWEST,
+        WEST,
         NORTHWEST,
     }
 
@@ -46,8 +48,8 @@ module AbaloneEngine {
 
     function getPieceMap(gs: GameState): PieceMap {
         var pm: PieceMap = {};
-        gs.blackPieces.forEach((c: AxialCoordinate) => pm[c.toString()] = Player.BLACK);
-        gs.whitePieces.forEach((c: AxialCoordinate) => pm[c.toString()] = Player.WHITE);
+        gs.blackPieces.forEach((c: Hex.AxialCoordinate) => pm[c.toString()] = Player.BLACK);
+        gs.whitePieces.forEach((c: Hex.AxialCoordinate) => pm[c.toString()] = Player.WHITE);
         return pm;
     }
 
@@ -58,11 +60,12 @@ module AbaloneEngine {
         return Outcome.ONGOING;
     }
 
-    function getAdjacentCoord(c: AxialCoordinate, d: Direction): AxialCoordinate {
-
+    function getAdjacentCoord(c: Hex.AxialCoordinate, d: Direction): Hex.AxialCoordinate {
+        return null;
+        // pass
     }
 
-    function isWithinBoardBoundaries(c: AxialCoordinate, r: GameRules) {
+    function isWithinBoardBoundaries(c: Hex.AxialCoordinate, r: GameRules) {
         return Hex.distanceToOrigin(c) <= r.boardRadius;
     }
 
@@ -71,24 +74,26 @@ module AbaloneEngine {
         if (move.pieces.length > gs.rules.maxPiecesPerMove) return false;
         var pieceMap = getPieceMap(gs);
         // verify each piece exists and is owned by the right player
-        if (move.pieces.some((c: AxialCoordinate) => pieceMap[c.toString()] !== gs.nextPlayer)) return false; 
+        if (move.pieces.some((c: Hex.AxialCoordinate) => pieceMap[c.toString()] !== gs.nextPlayer)) return false; 
         
 
-        function adjacentSpaceIsAvailable(c: AxialCoordinate): boolean {
+        function adjacentSpaceIsAvailable(c: Hex.AxialCoordinate): boolean {
             var nextSpace = getAdjacentCoord(c, move.direction);
-            return isWithinBoardBoundaries(nextSpace, gs.rules) && pieceMap[nextSpace] === undefined;
+            return isWithinBoardBoundaries(nextSpace, gs.rules) && pieceMap[nextSpace.toString()] === undefined;
         }
 
-        if (!piecesAreInALine(move.pieces)) return false; 
+        if (!Hex.isLine(move.pieces)) return false; 
 
-        var piecesAlignment = getAlignment(move.pieces);
-        if (piecesAlignment == null) return false; // pieces were not in a line :(
-        var isAStraightMove = piecesAlignment === decomposeDirection(move.direction).alignment;
-        if (isAStraightMove) {
-            // do the stragith move stuff
-        } else {
-            return move.pieces.every(adjacentSpaceIsAvailable);
-        }
+        // var piecesAlignment = getAlignment(move.pieces);
+        // if (piecesAlignment == null) return false; // pieces were not in a line :(
+        // var isAStraightMove = piecesAlignment === decomposeDirection(move.direction).alignment;
+        // if (isAStraightMove) {
+        //     // do the stragith move stuff
+        // } else {
+        //     return move.pieces.every(adjacentSpaceIsAvailable);
+        // }
+        return false;
 
     }
+}
 }

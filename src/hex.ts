@@ -5,39 +5,38 @@ export module Hex {
 	// This module will be much easier to understand if you read this wonderful page: http://www.redblobgames.com/grids/hexagons/
 	// every function in this module is pure
 
-    export interface Axial extends Array<number> {
+    export interface AxialCoordinate extends Array<number> {
         0: number;
         1: number;
     }
 
-    export interface Cubic extends Array<number> {
+    export interface CubicCoordinate extends Array<number> {
         0: number;
         1: number;
         2: number;
     }
 
-
-    export function axial2cubic(c: Axial): Cubic {
+    export function axial2cubic(c: AxialCoordinate): CubicCoordinate {
     	return [c[0], -c[0]-c[1], c[1]];
     }
 	
-	export function cubic2axial(c: Cubic): Axial {
+	export function cubic2axial(c: CubicCoordinate): AxialCoordinate {
 		return [c[0], c[2]];
 	}
 
-	function cubify(c: Axial): Cubic;
-	function cubify(c: Cubic): Cubic;
-	function cubify(c: any): Cubic {
+	function cubify(c: AxialCoordinate): CubicCoordinate;
+	function cubify(c: CubicCoordinate): CubicCoordinate;
+	function cubify(c: any): CubicCoordinate {
 		return (c.length === 2) ? axial2cubic(c) : c;
 	}
 
-	function add(a: Cubic, b: Cubic) {
+	function add(a: CubicCoordinate, b: CubicCoordinate) {
 		return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 	}
 
-	var directions: Cubic[] = [[-1, 0, 0], [1, 0, 0], [0, -1, 0], [0, 1, 0], [0, 0, -1], [0, 0, 1]];
-	export function getNeighbors(c: Axial): Axial[];
-	export function getNeighbors(c: Cubic): Cubic[];
+	var directions: CubicCoordinate[] = [[-1, 0, 0], [1, 0, 0], [0, -1, 0], [0, 1, 0], [0, 0, -1], [0, 0, 1]];
+	export function getNeighbors(c: AxialCoordinate): AxialCoordinate[];
+	export function getNeighbors(c: CubicCoordinate): CubicCoordinate[];
 	export function getNeighbors(c: any): any[] {
 		var axialMode = (c.length === 2);
 		var origin = cubify(c);
@@ -46,8 +45,8 @@ export module Hex {
 	}
 
 
-	export function manhattanDistance(c1: Axial, c2: Axial): number;
-	export function manhattanDistance(c1: Cubic, c2: Cubic): number;
+	export function manhattanDistance(c1: AxialCoordinate, c2: AxialCoordinate): number;
+	export function manhattanDistance(c1: CubicCoordinate, c2: CubicCoordinate): number;
 	export function manhattanDistance(c1: any			 , c2: any			  ): number {
 		c1 = cubify(c1);
 		c2 = cubify(c2);
@@ -59,11 +58,11 @@ export module Hex {
 		Return true if they are colinear and are consecutively space (ie there are no gaps)
 		Return false otherwise.
 	*/
-	export function isLine(cs: Axial[]): boolean;
-	export function isLine(cs: Cubic[]): boolean;
+	export function isLine(cs: AxialCoordinate[]): boolean;
+	export function isLine(cs: CubicCoordinate[]): boolean;
 	export function isLine(cs: any[]): boolean {
 		if (cs.length < 2) return true;
-		var coordinates: Cubic[] = (cs[0].q != null) ? cs.map(axial2cubic) : cs;
+		var coordinates: CubicCoordinate[] = (cs[0].q != null) ? cs.map(axial2cubic) : cs;
 		
 		var axesDiffered = Util.pairs(coordinates).reduce((accumulator, pair) => {
 			return {
@@ -74,13 +73,13 @@ export module Hex {
 		var numAxesDiffered = +axesDiffered.x + +axesDiffered.y + +axesDiffered.z;
 		if (numAxesDiffered > 1) return false;
 
-		var distances = coordinates.map((c: Cubic) => manhattanDistance(c, coordinates[0]));
+		var distances = coordinates.map((c: CubicCoordinate) => manhattanDistance(c, coordinates[0]));
 		if (_.max(distances) - _.min(distances) !== cs.length - 1) return false;
 		return true;
 	}
 
-	export function distanceToOrigin(c: Axial): number;
-	export function distanceToOrigin(c: Cubic): number;
+	export function distanceToOrigin(c: AxialCoordinate): number;
+	export function distanceToOrigin(c: CubicCoordinate): number;
 	export function distanceToOrigin(c: any): number {
 		return manhattanDistance(cubify(c), [0,0,0]);
 	}

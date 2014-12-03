@@ -31,6 +31,12 @@ module.exports = function(grunt) {
   var configJSON = {
     pkg: grunt.file.readJSON("package.json"),
     ts: tsJSON,
+    blanket_mocha: {
+      all: ['test/test.html'],
+      options: {
+        threshold: 70
+      }
+    },
   };
 
 
